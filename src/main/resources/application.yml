@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/chatdb
+    username: chatuser
+    password: chatpass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      resource server:
+        jwt:
+          issuer-uri: http://keycloak:8080/auth/realms/chat
+  data:
+    redis:
+      port: 6379
+      host: redis
+
+server:
+  port: 8080
+
+chat:
+  websocket-endpoint: /ws/chat
+  file-upload-dir: /app/uploads
