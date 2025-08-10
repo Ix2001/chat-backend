@@ -32,7 +32,7 @@ public class RoomService {
     private final MembershipRepository memRepo;
     private final UserRepository userRepo;
     private final RoomMapper mapper;
-    private final ChatWebSocketHandler wsHandler;
+    private final WebSocketPushService wsHandler;
     private final ObjectMapper objectMapper;
 
     public RoomDto createDirect(Long u1, Long u2) {

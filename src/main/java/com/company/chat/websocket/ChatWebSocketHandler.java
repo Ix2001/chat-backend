@@ -32,6 +32,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final FileStorageService fileSvc;
     private final CallService callSvc;
     private final UserService userSvc;
+    private final WebSocketSessionRegistry registry;
 
     private final Map<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
@@ -42,6 +43,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .filter(u->u.getUsername().equals(username))
                 .findFirst().orElseThrow().getId();
         sessions.put(uid, sess);
+        registry.register(username, sess);
     }
 
     @Override
