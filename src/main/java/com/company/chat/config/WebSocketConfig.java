@@ -2,6 +2,7 @@ package com.company.chat.config;
 
 
 import com.company.chat.websocket.ChatWebSocketHandler;
+import com.company.chat.websocket.JwtHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;

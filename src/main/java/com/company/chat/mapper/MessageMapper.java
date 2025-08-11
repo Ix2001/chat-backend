@@ -12,7 +12,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
     @Mapping(target = "roomId",   source = "room.id")
-    @Mapping(target = "senderId", source = "sender.id")
     MessageDto toDto(Message m);
 
     @Mapping(target = "room", ignore = true)

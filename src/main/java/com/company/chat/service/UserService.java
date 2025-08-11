@@ -5,6 +5,8 @@ import com.company.chat.dto.UserDto;
 import com.company.chat.mapper.UserMapper;
 import com.company.chat.model.User;
 import com.company.chat.repository.UserRepository;
+import com.company.chat.security.TokenUser;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -33,5 +35,23 @@ public class UserService {
         var u = repo.findById(userId).orElseThrow();
         mapper.updatePublicKey(u, dto);
         repo.save(u);
+    }
+
+    @Transactional
+    public User ensureFromToken(TokenUser tu) {
+        return repo.findByExternalId(tu.externalId())
+                .map(u -> {
+                    boolean changed = false;
+                    if (tu.username()!=null && !tu.username().equals(u.getUsername())) { u.setUsername(tu.username()); changed = true; }
+                    if (tu.displayName()!=null && !tu.displayName().equals(u.getDisplayName())) { u.setDisplayName(tu.displayName()); changed = true; }
+                    if (tu.email()!=null && !tu.email().equals(u.getEmail())) { u.setEmail(tu.email()); changed = true; }
+                    return changed ? repo.save(u) : u;
+                })
+                .orElseGet(() -> repo.save(User.builder()
+                        .externalId(tu.externalId())
+                        .username(tu.username())
+                        .displayName(tu.displayName())
+                        .email(tu.email())
+                        .build()));
     }
 }

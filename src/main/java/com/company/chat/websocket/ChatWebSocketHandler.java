@@ -55,18 +55,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession sess, TextMessage msg) throws Exception {
         JsonNode root = mapper.readTree(msg.getPayload());
         String action = root.get("action").asText();
+        Long senderId = (Long) sess.getAttributes().get("userId");
 
         switch(action) {
             case "sendMessage":
                 Long roomId = root.get("roomId").asLong();
-                Long senderId = root.get("senderId").asLong();
                 String content = root.get("content").asText();
                 msgSvc.saveEncrypted(roomId, senderId, content);
                 break;
 
             case "fileMessage":
                 roomId = root.get("roomId").asLong();
-                senderId = root.get("senderId").asLong();
                 // assume content holds fileId
                 Long fileId = Long.valueOf(root.get("fileId").asText());
                 msgSvc.saveEncrypted(roomId, senderId, fileId.toString());

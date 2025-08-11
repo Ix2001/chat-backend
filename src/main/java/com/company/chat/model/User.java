@@ -21,6 +21,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Внешний ID из Keycloak (JWT "sub") */
+    @Column(name = "external_id", nullable = false)
+    private String externalId;
+
+    @Column(unique = true)
+    private String email;
+
     @Column(nullable = false, unique = true)
     private String username;
 
