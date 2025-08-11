@@ -38,7 +38,7 @@ public class FileStorageService {
                 .size(file.getSize()).storagePath(tgt.toString())
                 .build());
         MessageDto dto = MessageDto.builder()
-                .roomId(roomId).senderId(senderId)
+                .roomId(roomId)
                 .type("FILE")
                 .content(meta.getId().toString())
                 .timestamp(Instant.now())

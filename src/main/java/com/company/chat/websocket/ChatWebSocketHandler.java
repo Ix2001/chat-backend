@@ -37,13 +37,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession sess) {
-        String username = (String)sess.getAttributes().get("username");
-        Long uid = userSvc.listAll().stream()
-                .filter(u->u.getUsername().equals(username))
-                .findFirst().orElseThrow().getId();
-        sessions.put(uid, sess);
-        registry.register(username, sess);
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        Long userId = toLong(session.getAttributes().get("userId"));
+        if (userId == null) { session.close(new CloseStatus(1008, "Unauthorized")); return; }
+
+        registry.register(userId.toString(), session);
+        sessions.put(userId, session); // <-- ДОБАВЬ ЭТО
+    }
+    private Long toLong(Object v) {
+        if (v instanceof Long l) return l;
+        if (v instanceof Integer i) return i.longValue();
+        if (v instanceof String s) try { return Long.parseLong(s); } catch (Exception ignored) {}
+        return null;
     }
 
     @Override
@@ -58,9 +63,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         switch(action) {
             case "sendMessage":
-                Long roomId = root.get("roomId").asLong();
-                Long senderId = root.get("senderId").asLong();
-                String content = root.get("content").asText();
+                Long roomId   = root.path("roomId").asLong(0L);          // path() не даёт NPE
+                Long senderId = toLong(sess.getAttributes().get("userId")); // из JWT, не из кадра
+                String content= root.path("content").asText(null);
+                if (roomId == 0L || content == null) {
+                    // можно ответить ошибкой или просто return
+                    return;
+                }
                 msgSvc.saveEncrypted(roomId, senderId, content);
                 break;
 
