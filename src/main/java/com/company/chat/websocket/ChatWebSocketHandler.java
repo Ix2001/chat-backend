@@ -67,7 +67,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 Long senderId = toLong(sess.getAttributes().get("userId")); // из JWT, не из кадра
                 String content= root.path("content").asText(null);
                 if (roomId == 0L || content == null) {
-                    // можно ответить ошибкой или просто return
                     return;
                 }
                 msgSvc.saveEncrypted(roomId, senderId, content);
@@ -76,7 +75,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             case "fileMessage":
                 roomId = root.get("roomId").asLong();
                 senderId = root.get("senderId").asLong();
-                // assume content holds fileId
                 Long fileId = Long.valueOf(root.get("fileId").asText());
                 msgSvc.saveEncrypted(roomId, senderId, fileId.toString());
                 break;

@@ -92,4 +92,9 @@ public class RoomService {
         TextMessage wsMessage1 = new TextMessage(msg.toString());
         userIds.forEach(uid -> wsHandler.sendTo(uid, wsMessage1));
     }
+
+    @Transactional
+    public List<RoomDto> getByUser(Long userId) {
+        return roomRepo.findById(userId).stream().map(mapper::toDto).toList();
+    }
 }

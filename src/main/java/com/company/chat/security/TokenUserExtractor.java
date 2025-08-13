@@ -7,16 +7,14 @@ import org.springframework.stereotype.Component;
 public class TokenUserExtractor {
 
     public TokenUser from(Jwt jwt) {
-        // username: берём по приоритету
         String username = firstNonBlank(
                 claim(jwt, "preferred_username"),
-                claim(jwt, "upn"),           // иногда встречается
+                claim(jwt, "upn"),
                 claim(jwt, "email"),
                 claim(jwt, "phone_number"),
-                jwt.getSubject()             // самый последний фолбэк
+                jwt.getSubject()
         );
 
-        // displayName: name или given_name + family_name, иначе username
         String dn = claim(jwt, "name");
         if (isBlank(dn)) {
             String gn = claim(jwt, "given_name");
