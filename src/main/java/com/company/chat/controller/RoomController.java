@@ -41,4 +41,8 @@ public class RoomController {
         svc.inviteUsers(req.getRoomId(), req.getUserIds());
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/all-by-user-id")
+    public List<RoomDto> byUser(@RequestParam Long userId) {
+        return svc.getByUser(userId);
+    }
 }

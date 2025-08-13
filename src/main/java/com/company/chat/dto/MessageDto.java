@@ -13,7 +13,6 @@ import java.time.Instant;
 public class MessageDto {
     private Long id;
     private Long roomId;
-    private Long senderId;
     private String type;
     private String content;
     private Instant timestamp;
