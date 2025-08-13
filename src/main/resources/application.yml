@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/chat
@@ -9,19 +12,17 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-  security:
-    oauth2:
-      resource server:
-        jwt:
-          issuer-uri: https://auth.dev.hr.alabuga.space/realms/Alabuga
   data:
     redis:
+      host: localhost   # если Redis локально; если в Docker сети — укажи имя сервиса
       port: 6379
-      host: redis
 
-server:
-  port: 8080
+# ВАЖНО: app.jwt — на верхнем уровне, не под spring!
+app:
+  jwt:
+    # ключ base64 длиной >= 32 байт
+    secret: "base64:8nGdQ5D4m5Vb5eD3qgQ3m8X7eQx6bXw5Vq3f1mV3l2c9tQ7m3yWn2zQ5uY6pR8sK"
+    ttl-seconds: 86400   # 1 день
 
 chat:
   websocket-endpoint: /ws/chat
