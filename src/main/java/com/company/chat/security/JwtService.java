@@ -3,40 +3,34 @@ package com.company.chat.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    private final Key key;
-    private final long expMillis;
-    @Value("${app.jwt.secret}")
-    private String secret;
-    @Value("${app.jwt.ttl-seconds}") long ttlSeconds;
+    private Key key() { return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret)); }
+    @Value("${app.jwt.secret}") private String secret;          // base64
+    @Value("${app.jwt.access-ttl:PT24H}") private Duration ttl;
 
-    public JwtService(
-            @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.ttl-seconds}") long expMillis
-    ) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expMillis = expMillis;
-    }
     public String generate(String username, String rolesCsv) {
         Date now = new Date();
-        Date exp = new Date(now.getTime() + ttlSeconds * 1000);
+        Date exp = new Date(now.getTime() + ttl.toMillis());
         return Jwts.builder()
                 .setSubject(username)
-                .addClaims(Map.of("roles", rolesCsv == null ? "" : rolesCsv))
+                .claim("roles", rolesCsv)
                 .setIssuedAt(now)
                 .setExpiration(exp)
-                .signWith(signingKey(), SignatureAlgorithm.HS256)
+                .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
     private Key signingKey() {
@@ -51,13 +45,14 @@ public class JwtService {
     }
 
     public String generateToken(String username, Map<String, Object> extraClaims) {
-        long now = System.currentTimeMillis();
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + ttl.toMillis());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(username)
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + expMillis))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -75,9 +70,18 @@ public class JwtService {
         return exp.before(new Date());
     }
 
+    public boolean isValid(String token) {
+        try {
+            String username = extractUsername(token);
+            return isValid(token, username);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(key())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

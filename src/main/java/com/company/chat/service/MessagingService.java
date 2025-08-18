@@ -41,6 +41,16 @@ public class MessagingService {
         return dto;
     }
 
+    public Message saveEncryptedEntity(Long roomId, Long senderId, String content) {
+        Room r = roomRepo.findById(roomId).orElseThrow();
+        User u = userRepo.findById(senderId).orElseThrow();
+        Message m = Message.builder()
+                .room(r).sender(u)
+                .type("ENCRYPTED").content(content)
+                .timestamp(Instant.now()).build();
+        return msgRepo.save(m);
+    }
+
     public List<MessageDto> history(Long roomId) {
         Room r = roomRepo.findById(roomId).orElseThrow();
         return msgRepo.findByRoomOrderByTimestamp(r).stream()

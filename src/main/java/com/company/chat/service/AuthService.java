@@ -1,3 +1,5 @@
+package com.company.chat.service;
+
 import com.company.chat.repository.UserRepository;
 import com.company.chat.security.JwtService;
 import lombok.RequiredArgsConstructor;

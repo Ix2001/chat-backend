@@ -40,8 +40,8 @@ public class FileStorageService {
         MessageDto dto = MessageDto.builder()
                 .roomId(roomId).senderId(senderId)
                 .type("FILE")
-                .content(meta.getId().toString())
-                .timestamp(Instant.now())
+                .text(meta.getId().toString())
+                .createdAt(Instant.now())
                 .build();
         evPub.publishEvent(new FileUploadedEvent(this, dto));
         return dto;

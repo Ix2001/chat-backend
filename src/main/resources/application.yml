@@ -21,8 +21,8 @@ spring:
 app:
   jwt:
     # ключ base64 длиной >= 32 байт
-    secret: "base64:8nGdQ5D4m5Vb5eD3qgQ3m8X7eQx6bXw5Vq3f1mV3l2c9tQ7m3yWn2zQ5uY6pR8sK"
-    ttl-seconds: 86400   # 1 день
+    secret: "8nGdQ5D4m5Vb5eD3qgQ3m8X7eQx6bXw5Vq3f1mV3l2c9tQ7m3yWn2zQ5uY6pR8sK"
+    access-ttl: PT24H
 
 chat:
   websocket-endpoint: /ws/chat

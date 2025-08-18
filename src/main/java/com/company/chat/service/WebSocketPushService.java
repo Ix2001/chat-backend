@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -17,6 +18,7 @@ import org.springframework.web.socket.WebSocketSession;
  * НЕ зависит от RoomService и от самого ChatWebSocketHandler — это важно.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WebSocketPushService {
 
@@ -30,7 +32,7 @@ public class WebSocketPushService {
         try {
             s.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload)));
         } catch (IOException e) {
-            // можно залогировать
+            log.warn(e.getMessage());
         }
     }
 

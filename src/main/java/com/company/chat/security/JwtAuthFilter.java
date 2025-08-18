@@ -29,29 +29,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
+        try {
+            String h = req.getHeader("Authorization");
+            if (h != null && h.startsWith("Bearer ")
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        String h = req.getHeader("Authorization");
-        if (h != null && h.startsWith("Bearer ")
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String token = h.substring(7);
 
-            String token = h.substring(7);
+                if (jwtService.isValid(token)) {
+                    String username = jwtService.extractUsername(token);
 
-            // Лучше так: сверяем subject и подпись
-            String username = jwtService.extractUsername(token);
-            if (username != null && jwtService.isValid(token, username)) {
-                var user = userRepo.findByUsername(username).orElse(null);
+                    var user = userRepo.findByUsername(username).orElse(null);
+                    Collection<? extends GrantedAuthority> auths =
+                            (user != null && user.getRoles() != null && !user.getRoles().isBlank())
+                                    ? AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRoles())
+                                    : List.of();
 
-                // Приводим к корректному типу коллекции грантов
-                Collection<? extends GrantedAuthority> auths =
-                        (user != null && user.getRoles() != null && !user.getRoles().isBlank())
-                                ? AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRoles())
-                                : List.of();
-
-                var auth = new UsernamePasswordAuthenticationToken(username, null, auths);
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                    var auth = new UsernamePasswordAuthenticationToken(username, null, auths);
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
+            chain.doFilter(req, res);
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json");
+            res.getWriter().write("{\"error\":\"token_expired\"}");
         }
-        chain.doFilter(req, res);
     }
 }

@@ -92,7 +92,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 break;
 
             case "iceCandidate":
-                // для iceCandidate прокидывать напрямую:
+
                 Long to = root.get("to").asLong();
                 sendTo(to, new TextMessage(msg.getPayload()));
                 break;
