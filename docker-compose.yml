@@ -32,4 +32,4 @@ services:
       SPRING_DATASOURCE_PASSWORD: chatpass
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
-      chat.file-upload-dir: /app/uploads
+      CHAT_FILE_UPLOAD_DIR: /app/uploads
